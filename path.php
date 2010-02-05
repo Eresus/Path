@@ -2,17 +2,16 @@
 /**
  * "Хлебные крошки"
  *
- * Eresus 2
+ * Eresus 2.10rc2
  *
- * Строка с местом положения на сайте
+ * Строка с местом положения на сайте.
  *
  * @version 2.00
  *
- * @copyright 	2005-2007, ProCreat Systems, http://procreat.ru/
- * @copyright   2007-2008, Eresus Group, http://eresus.ru/
- * @license     http://www.gnu.org/licenses/gpl.txt  GPL License 3
- * @maintainer  Mikhail Krasilnikov <mk@procreat.ru>
- * @author      Mikhail Krasilnikov <mk@procreat.ru>
+ * @copyright 2005, ProCreat Systems, http://procreat.ru/
+ * @copyright 2007, Eresus Group, http://eresus.ru/
+ * @license http://www.gnu.org/licenses/gpl.txt  GPL License 3
+ * @author Mikhail Krasilnikov <mk@procreat.ru>
  *
  * Данная программа является свободным программным обеспечением. Вы
  * вправе распространять ее и/или модифицировать в соответствии с
@@ -30,15 +29,24 @@
  * GNU с этой программой. Если Вы ее не получили, смотрите документ на
  * <http://www.gnu.org/licenses/>
  *
+ * @package Path
+ *
+ * $Id$
  */
 
-class Path extends Plugin {
-  var $version = '2.00b';
+/**
+ * Основной класс плагина
+ *
+ * @package Path
+ */
+class Path extends Plugin
+{
+  var $version = '2.00';
   var $kernel = '2.10rc2';
 	var $title = '"Хлебные крошки"';
   var $description = 'Строка с местом положения на сайте';
 	var $type = 'client';
-  var $settings = array(
+  var $settings = array (
     'prefix' => '',
     'delimiter' => '&nbsp;&raquo;&nbsp;',
     'link' => '<a href="$(url)" title="$(description)">$(caption)</a>',
@@ -46,8 +54,21 @@ class Path extends Plugin {
     'levelMin' => 0,
     'levelMax' => 0,
   );
-  var $path = array(); # Строка пути
-  var $level = -1; # Вложенность страницы
+
+  /**
+   * Хранит элементы пути
+   *
+   * @var array
+   */
+  var $path = array();
+
+  /**
+   * Уровень вложенности текущего раздела
+   *
+   * @var int
+   */
+  var $level = -1;
+
   /**
    * Конструктор
    *
@@ -59,6 +80,7 @@ class Path extends Plugin {
     $this->listenEvents('clientOnURLSplit', 'clientOnPageRender');
   }
   //-----------------------------------------------------------------------------
+
   function settings()
   {
   	global $page;
@@ -85,6 +107,7 @@ class Path extends Plugin {
     return $result;
   }
   //-----------------------------------------------------------------------------
+
   function clientOnPageRender($text)
   {
     global $page;
@@ -107,6 +130,7 @@ class Path extends Plugin {
     return $result;
   }
   //-----------------------------------------------------------------------------
+
   function clientOnURLSplit($item, $url)
   {
     $item[$this->name.'_url'] = ($url == 'main/')?'':$url;
@@ -115,4 +139,3 @@ class Path extends Plugin {
   }
   //-----------------------------------------------------------------------------
 }
-?>
