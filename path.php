@@ -1,6 +1,6 @@
 <?php
 /**
- * "Хлебные крошки"
+ * Положение на сайте
  *
  * Строка с местом положения на сайте.
  *
@@ -39,9 +39,15 @@
  */
 class Path extends Plugin
 {
+	/**
+	 * Версия плагина
+	 *
+	 * @var string
+	 */
   public $version = '2.01a';
-  public $kernel = '2.10rc2';
-	public $title = '"Хлебные крошки"';
+
+  public $kernel = '2.10';
+	public $title = 'Положение на сайте';
   public $description = 'Строка с местом положения на сайте';
 	public $type = 'client';
   public $settings = array (
