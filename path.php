@@ -1,12 +1,10 @@
 <?php
 /**
- * "Хлебные крошки"
- *
- * Eresus 2.10rc2
+ * Положение на сайте
  *
  * Строка с местом положения на сайте.
  *
- * @version 2.00
+ * @version 2.01
  *
  * @copyright 2005, ProCreat Systems, http://procreat.ru/
  * @copyright 2007, Eresus Group, http://eresus.ru/
@@ -41,12 +39,18 @@
  */
 class Path extends Plugin
 {
-  var $version = '2.00';
-  var $kernel = '2.10rc2';
-	var $title = '"Хлебные крошки"';
-  var $description = 'Строка с местом положения на сайте';
-	var $type = 'client';
-  var $settings = array (
+	/**
+	 * Версия плагина
+	 *
+	 * @var string
+	 */
+  public $version = '2.01';
+
+  public $kernel = '2.10';
+	public $title = 'Положение на сайте';
+  public $description = 'Строка с местом положения на сайте';
+	public $type = 'client';
+  public $settings = array (
     'prefix' => '',
     'delimiter' => '&nbsp;&raquo;&nbsp;',
     'link' => '<a href="$(url)" title="$(description)">$(caption)</a>',
@@ -60,23 +64,23 @@ class Path extends Plugin
    *
    * @var array
    */
-  var $path = array();
+  public $path = array();
 
   /**
    * Уровень вложенности текущего раздела
    *
    * @var int
    */
-  var $level = -1;
+  public $level = -1;
 
   /**
    * Конструктор
    *
    * @return Path
    */
-  function Path()
+  public function __construct()
   {
-    parent::Plugin();
+    parent::__construct();
     $this->listenEvents('clientOnURLSplit', 'clientOnPageRender');
   }
   //-----------------------------------------------------------------------------
