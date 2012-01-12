@@ -4,12 +4,13 @@
  *
  * Строка с местом положения на сайте.
  *
- * @version 2.01
+ * @version 2.02
  *
  * @copyright 2005, ProCreat Systems, http://procreat.ru/
  * @copyright 2007, Eresus Group, http://eresus.ru/
  * @license http://www.gnu.org/licenses/gpl.txt  GPL License 3
- * @author Mikhail Krasilnikov <mk@procreat.ru>
+ * @author Михаил Красильников <mihalych@vsepofigu.ru>
+ * @author Olex
  *
  * Данная программа является свободным программным обеспечением. Вы
  * вправе распространять ее и/или модифицировать в соответствии с
@@ -44,7 +45,7 @@ class Path extends Plugin
 	 *
 	 * @var string
 	 */
-	public $version = '2.01a';
+	public $version = '2.02a';
 
 	public $kernel = '2.10';
 	public $title = 'Положение на сайте';
@@ -57,7 +58,7 @@ class Path extends Plugin
 		'current' => '$(caption)',
 		'levelMin' => 0,
 		'levelMax' => 0,
-		'noShowHidden' => 1,
+		'showHidden' => false,
 	);
 
 	/**
@@ -101,13 +102,13 @@ class Path extends Plugin
 				array('type'=>'edit','name'=>'link','label'=>'Шаблон ссылки','width'=>'100%'),
 				array('type'=>'edit','name'=>'current','label'=>'Для текущей страницы','width'=>'100%'),
 				array('type'=>'edit','name'=>'levelMin','label'=>'Мин.вложенность','width'=>'20px',
-				'comment'=>' 0 - любая'),
+					'comment'=>' 0 - любая'),
 				array('type'=>'edit','name'=>'levelMax','label'=>'Макс.вложенность','width'=>'20px',
-				'comment'=>' 0 - любая'),
-				array('type'=>'checkbox','name'=>'noShowHidden','label'=>'Не показывать скрытые разделы'),
+					'comment'=>' 0 - любая'),
+				array('type'=>'checkbox','name'=>'showHidden','label'=>'Показывать скрытые разделы'),
 				array('type'=>'divider'),
 				array('type'=>'text',
-				'value'=>"Заменяет макрос $(Path) на строку с текущим положением на сайте."),
+					'value'=>"Заменяет макрос $(Path) на строку с текущим положением на сайте."),
 				array('type'=>'divider'),
 			),
 			'buttons' => array('ok', 'apply', 'cancel'),
@@ -131,7 +132,9 @@ class Path extends Plugin
 			{
 				$item = $this->path[$i];
 				$item['url'] = httpRoot.$item[$this->name.'_url'];
-				$template = ($i == count($this->path)-1)?$this->settings['current']:$this->settings['link'];
+				$template = ($i == count($this->path)-1) ?
+					$this->settings['current'] :
+					$this->settings['link'];
 				$result[] = $this->replaceMacros($template, $item);
 			}
 			$result = implode($this->settings['delimiter'], $result);
@@ -145,17 +148,21 @@ class Path extends Plugin
 	}
 	//-----------------------------------------------------------------------------
 
-	function clientOnURLSplit($item, $url)
+	/**
+	 * Добавляет разделы в путь
+	 *
+	 * @param array $item
+	 * @param string $url
+	 *
+	 * @return void
+	 */
+	public function clientOnURLSplit(array $item, $url)
 	{
-		$item[$this->name.'_url'] = ($url == 'main/')?'':$url;
-		if ($item['visible'] == 0 && $this->settings['noShowHidden'] == 1)
-		{
-			return;	
-		}
-		else
+		$item[$this->name . '_url'] = 'main/' == $url ? '' : $url;
+		if ($item['visible'] || $this->settings['showHidden'])
 		{
 			$this->path[] = $item;
-			$this->level++;		
+			$this->level++;
 		}
 	}
 	//-----------------------------------------------------------------------------
