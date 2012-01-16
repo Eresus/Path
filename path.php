@@ -59,6 +59,7 @@ class Path extends Plugin
 		'levelMin' => 0,
 		'levelMax' => 0,
 		'showHidden' => false,
+		'showMain' => true,
 	);
 
 	/**
@@ -106,6 +107,7 @@ class Path extends Plugin
 				array('type'=>'edit','name'=>'levelMax','label'=>'Макс.вложенность','width'=>'20px',
 					'comment'=>' 0 - любая'),
 				array('type'=>'checkbox','name'=>'showHidden','label'=>'Показывать скрытые разделы'),
+				array('type'=>'checkbox','name'=>'showMain','label'=>'Всегда показывать главную'),
 				array('type'=>'divider'),
 				array('type'=>'text',
 					'value'=>"Заменяет макрос $(Path) на строку с текущим положением на сайте."),
@@ -159,7 +161,11 @@ class Path extends Plugin
 	public function clientOnURLSplit(array $item, $url)
 	{
 		$item[$this->name . '_url'] = 'main/' == $url ? '' : $url;
-		if ($item['visible'] || $this->settings['showHidden'])
+		if (
+			($item['visible'] || $this->settings['showHidden'])
+			|| 
+			($item['name'] == 'main' && $this->settings['showMain'])
+		)
 		{
 			$this->path[] = $item;
 			$this->level++;
