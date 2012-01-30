@@ -59,7 +59,7 @@ class Path extends Plugin
 		'levelMin' => 0,
 		'levelMax' => 0,
 		'showHidden' => false,
-		'showMain' => true,
+		'showCurrent' => true,
 	);
 
 	/**
@@ -107,7 +107,8 @@ class Path extends Plugin
 				array('type'=>'edit','name'=>'levelMax','label'=>'ћакс.вложенность','width'=>'20px',
 					'comment'=>' 0 - люба€'),
 				array('type'=>'checkbox','name'=>'showHidden','label'=>'ѕоказывать скрытые разделы'),
-				array('type'=>'checkbox','name'=>'showMain','label'=>'¬сегда показывать главную'),
+				array('type'=>'checkbox','name'=>'showCurrent',
+					'label'=>'ѕоказывать текущий раздел даже если он скрытый'),
 				array('type'=>'divider'),
 				array('type'=>'text',
 					'value'=>"«амен€ет макрос $(Path) на строку с текущим положением на сайте."),
@@ -122,6 +123,7 @@ class Path extends Plugin
 
 	function clientOnPageRender($text)
 	{
+		global $Eresus;
 
 		if (
 			(!$this->settings['levelMin'] || ($this->level >= $this->settings['levelMin']))
@@ -130,14 +132,23 @@ class Path extends Plugin
 		)
 		{
 			$result = array();
+
 			for ($i = 0; $i < count($this->path); $i++)
 			{
-				$item = $this->path[$i];
+				$item = $this->path[$i];	
 				$item['url'] = httpRoot.$item[$this->name.'_url'];
-				$template = ($i == count($this->path)-1) ?
-					$this->settings['current'] :
-					$this->settings['link'];
-				$result[] = $this->replaceMacros($template, $item);
+
+				if (
+					($item['visible'] || $this->settings['showHidden'])
+					|| 
+					($this->settings['showCurrent'] && $Eresus->request['path'] == $item['url'])
+				)
+				{
+					$template = ($i == count($this->path)-1) ?
+						$this->settings['current'] :
+						$this->settings['link'];
+					$result[] = $this->replaceMacros($template, $item);
+				}
 			}
 			$result = implode($this->settings['delimiter'], $result);
 			$result = str_replace('$(Path)', $this->settings['prefix'].$result, $text);
@@ -160,16 +171,10 @@ class Path extends Plugin
 	 */
 	public function clientOnURLSplit(array $item, $url)
 	{
+
 		$item[$this->name . '_url'] = 'main/' == $url ? '' : $url;
-		if (
-			($item['visible'] || $this->settings['showHidden'])
-			|| 
-			($item['name'] == 'main' && $this->settings['showMain'])
-		)
-		{
-			$this->path[] = $item;
-			$this->level++;
-		}
+		$this->path[] = $item;
+		$this->level++;
 	}
 	//-----------------------------------------------------------------------------
 }
