@@ -58,7 +58,7 @@ class Path extends Plugin
 		'current' => '$(caption)',
 		'levelMin' => 0,
 		'levelMax' => 0,
-		'showHidden' => false,
+		'showHidden' => true,
 		'showCurrent' => true,
 	);
 
