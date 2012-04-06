@@ -81,10 +81,13 @@ class Path extends Plugin
 	 * @var string
 	 */
 	public $settings = array (
-		'prefix' => '',
-		'delimiter' => '&nbsp;&raquo;&nbsp;',
-		'link' => '<a href="$(url)" title="$(description)">$(caption)</a>',
-		'current' => '$(caption)',
+		'template' => '{foreach $sections s, implode=" &raquo; "}
+	{if $s.isCurrent}
+		{$s.caption}
+	{else}
+		<a href="{$s.url}" title="{$s.description}">{$s.caption}</a>
+	{/if}
+{/foreach}',
 		'levelMin' => 0,
 		'levelMax' => 0,
 		'showHidden' => true,
@@ -131,13 +134,9 @@ class Path extends Plugin
 		$form = array(
 			'name' => 'Settings',
 			'caption' => $this->title.' '.$this->version,
-			'width' => '500px',
+			'width' => '700px',
 			'fields' => array (
 				array('type'=>'hidden','name'=>'update', 'value'=>$this->name),
-				array('type'=>'edit','name'=>'prefix','label'=>'Префикс пути','width'=>'100%'),
-				array('type'=>'edit','name'=>'delimiter','label'=>'Разделитель разделов','width'=>'100%'),
-				array('type'=>'edit','name'=>'link','label'=>'Шаблон ссылки','width'=>'100%'),
-				array('type'=>'edit','name'=>'current','label'=>'Для текущей страницы','width'=>'100%'),
 				array('type'=>'edit','name'=>'levelMin','label'=>'Мин.вложенность','width'=>'20px',
 					'comment'=>' 0 - любая'),
 				array('type'=>'edit','name'=>'levelMax','label'=>'Макс.вложенность','width'=>'20px',
@@ -145,6 +144,8 @@ class Path extends Plugin
 				array('type'=>'checkbox','name'=>'showHidden','label'=>'Показывать скрытые разделы'),
 				array('type'=>'checkbox','name'=>'showCurrent',
 					'label'=>'Показывать текущий раздел даже если он скрытый'),
+				array('type' => 'memo','name' => 'template', 'syntax' => 'html', 'height' => 10,
+					'label'=>'Шаблон'),
 				array('type'=>'divider'),
 				array('type'=>'text',
 					'value'=>"Заменяет макрос $(Path) на строку с текущим положением на сайте."),
@@ -169,38 +170,39 @@ class Path extends Plugin
 		global $Eresus;
 
 		if (
-			(!$this->settings['levelMin'] || ($this->level >= $this->settings['levelMin']))
-			&&
-			(!$this->settings['levelMax'] || ($this->level <= $this->settings['levelMax']))
+			($this->settings['levelMin'] && ($this->level < $this->settings['levelMin']))
+			||
+			($this->settings['levelMax'] && ($this->level > $this->settings['levelMax']))
 		)
 		{
-			$result = array();
-
-			for ($i = 0; $i < count($this->path); $i++)
-			{
-				$item = $this->path[$i];
-				$item['url'] = httpRoot.$item[$this->name.'_url'];
-
-				if (
-					($item['visible'] || $this->settings['showHidden'])
-					||
-					($this->settings['showCurrent'] && $Eresus->request['path'] == $item['url'])
-				)
-				{
-					$template = ($i == count($this->path)-1) ?
-						$this->settings['current'] :
-						$this->settings['link'];
-					$result[] = $this->replaceMacros($template, $item);
-				}
-			}
-			$result = implode($this->settings['delimiter'], $result);
-			$result = str_replace('$(Path)', $this->settings['prefix'].$result, $text);
+			return $text;
 		}
-		else
+
+		/*
+		 * Нельзя выполнять эти действия в clientOnURLSplit, потому что в том методе ещё неизвестен
+		 * текущий раздел.
+		 */
+		$sections = array();
+		foreach ($this->path as $section)
 		{
-			$result = str_replace('$(Path)', '', $text);
+			$section['isCurrent'] = $section['id'] == $GLOBALS['page']->id;
+			if (
+				($section['visible'] || $this->settings['showHidden'])
+				||
+				($section['isCurrent'] && $this->settings['showCurrent'])
+			)
+			{
+				$sections []= $section;
+			}
 		}
-		return $result;
+
+		$tmpl = new Path_Tempalte();
+		$tmpl->loadFromString($this->settings['template']);
+		$html = $tmpl->compile(array('sections' => $sections));
+
+		$text = str_replace('$(Path)', $html, $text);
+
+		return $text;
 	}
 	//-----------------------------------------------------------------------------
 
@@ -214,10 +216,33 @@ class Path extends Plugin
 	 */
 	public function clientOnURLSplit(array $item, $url)
 	{
-
-		$item[$this->name . '_url'] = 'main/' == $url ? '' : $url;
-		$this->path[] = $item;
 		$this->level++;
+		$item['url'] = $GLOBALS['Eresus']->root . ('main/' == $url ? '' : $url);
+		$this->path[] = $item;
+	}
+	//-----------------------------------------------------------------------------
+}
+
+/**
+ * Расширенный шаблон
+ *
+ * @package Path
+ * @since 2.02
+ */
+class Path_Tempalte extends Template
+{
+	/**
+	 * Загружает код шаблона из строки
+	 *
+	 * @param string $code
+	 *
+	 * @return void
+	 *
+	 * @since 1.00
+	 */
+	public function loadFromString($code)
+	{
+		$this->file = new Dwoo_Template_String($code);
 	}
 	//-----------------------------------------------------------------------------
 }
