@@ -47,10 +47,39 @@ class Path extends Plugin
 	 */
 	public $version = '2.02a';
 
+	/**
+	 * Минимальная требуемая версия CMS
+	 *
+	 * @var string
+	 */
 	public $kernel = '2.10';
+
+	/**
+	 * Название
+	 *
+	 * @var string
+	 */
 	public $title = 'Положение на сайте';
-	public $description = 'Строка с местом положения на сайте';
+
+	/**
+	 * Описание
+	 *
+	 * @var string
+	 */
+	public $description = 'Строка с текущим местом положения на сайте';
+
+	/**
+	 * Тип
+	 *
+	 * @var string
+	 */
 	public $type = 'client';
+
+	/**
+	 * Настройки
+	 *
+	 * @var string
+	 */
 	public $settings = array (
 		'prefix' => '',
 		'delimiter' => '&nbsp;&raquo;&nbsp;',
@@ -88,7 +117,14 @@ class Path extends Plugin
 	}
 	//-----------------------------------------------------------------------------
 
-	function settings()
+	/**
+	 * Возвращает разметку диалога настроек
+	 *
+	 * @return string  HTML
+	 *
+	 * @since 1.00
+	 */
+	public function settings()
 	{
 		global $page;
 
@@ -121,6 +157,13 @@ class Path extends Plugin
 	}
 	//-----------------------------------------------------------------------------
 
+	/**
+	 * Проводит замену макроса
+	 *
+	 * @param string $text
+	 *
+	 * @return string
+	 */
 	function clientOnPageRender($text)
 	{
 		global $Eresus;
@@ -135,12 +178,12 @@ class Path extends Plugin
 
 			for ($i = 0; $i < count($this->path); $i++)
 			{
-				$item = $this->path[$i];	
+				$item = $this->path[$i];
 				$item['url'] = httpRoot.$item[$this->name.'_url'];
 
 				if (
 					($item['visible'] || $this->settings['showHidden'])
-					|| 
+					||
 					($this->settings['showCurrent'] && $Eresus->request['path'] == $item['url'])
 				)
 				{
