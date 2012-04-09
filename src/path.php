@@ -218,6 +218,8 @@ class Path extends Plugin
 	{
 		$this->level++;
 		$item['url'] = $GLOBALS['Eresus']->root . ('main/' == $url ? '' : $url);
+		$item['parents'] = explode('/', $url);
+		array_pop($item['parents']);
 		$this->path[] = $item;
 	}
 	//-----------------------------------------------------------------------------
