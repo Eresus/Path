@@ -4,7 +4,7 @@
  *
  * Строка с местом положения на сайте.
  *
- * @version 2.02
+ * @version 3.00
  *
  * @copyright 2005, ProCreat Systems, http://procreat.ru/
  * @copyright 2007, Eresus Group, http://eresus.ru/
@@ -45,7 +45,7 @@ class Path extends Plugin
 	 *
 	 * @var string
 	 */
-	public $version = '2.02a';
+	public $version = '3.00';
 
 	/**
 	 * Минимальная требуемая версия CMS
