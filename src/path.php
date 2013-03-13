@@ -45,14 +45,14 @@ class Path extends Plugin
 	 *
 	 * @var string
 	 */
-	public $version = '3.00';
+	public $version = '3.00a';
 
 	/**
 	 * Минимальная требуемая версия CMS
 	 *
 	 * @var string
 	 */
-	public $kernel = '2.12';
+	public $kernel = '3.00a';
 
 	/**
 	 * Название
