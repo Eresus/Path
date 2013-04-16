@@ -45,7 +45,7 @@ class Path extends Plugin
 	 *
 	 * @var string
 	 */
-	public $version = '3.00a';
+	public $version = '3.00';
 
 	/**
 	 * Минимальная требуемая версия CMS
