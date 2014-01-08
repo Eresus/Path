@@ -35,7 +35,7 @@
  *
  * @package Path
  */
-class Path extends Plugin
+class Path extends Eresus_Plugin
 {
     /**
      * Версия плагина
@@ -49,7 +49,7 @@ class Path extends Plugin
      *
      * @var string
      */
-    public $kernel = '3.00a';
+    public $kernel = '3.01a';
 
     /**
      * Название
@@ -64,13 +64,6 @@ class Path extends Plugin
      * @var string
      */
     public $description = 'Строка с текущим местом положения на сайте';
-
-    /**
-     * Тип
-     *
-     * @var string
-     */
-    public $type = 'client';
 
     /**
      * Настройки
@@ -113,7 +106,9 @@ class Path extends Plugin
     public function __construct()
     {
         parent::__construct();
-        $this->listenEvents('clientOnURLSplit', 'clientOnPageRender');
+        $evd = Eresus_Kernel::app()->getEventDispatcher();
+        $evd->addListener('cms.client.url_section_found', array($this, 'clientOnURLSplit'));
+        $evd->addListener('cms.client.render_page', array($this, 'clientOnPageRender'));
     }
 
     /**
@@ -125,8 +120,6 @@ class Path extends Plugin
      */
     public function settings()
     {
-        global $page;
-
         $form = array(
             'name' => 'Settings',
             'caption' => $this->title . ' ' . $this->version,
@@ -149,6 +142,8 @@ class Path extends Plugin
             ),
             'buttons' => array('ok', 'apply', 'cancel'),
         );
+        /** @var TAdminUI $page */
+        $page = Eresus_Kernel::app()->getPage();
         $result = $page->renderForm($form, $this->settings);
         return $result;
     }
@@ -156,21 +151,17 @@ class Path extends Plugin
     /**
      * Проводит замену макроса
      *
-     * @param string $text
-     *
-     * @return string
+     * @param Eresus_Event_Render $event
      */
-    function clientOnPageRender($text)
+    public function clientOnPageRender(Eresus_Event_Render $event)
     {
-        global $Eresus;
-
         if (
             ($this->settings['levelMin'] && ($this->level < $this->settings['levelMin']))
             ||
             ($this->settings['levelMax'] && ($this->level > $this->settings['levelMax']))
         )
         {
-            return $text;
+            return;
         }
 
         /*
@@ -180,7 +171,7 @@ class Path extends Plugin
         $sections = array();
         foreach ($this->path as $section)
         {
-            $section['isCurrent'] = $section['id'] == $GLOBALS['page']->id;
+            $section['isCurrent'] = $section['id'] == Eresus_Kernel::app()->getPage()->id;
             if (
                 ($section['visible'] || $this->settings['showHidden'])
                 ||
@@ -191,52 +182,28 @@ class Path extends Plugin
             }
         }
 
-        $tmpl = new Path_Tempalte();
-        $tmpl->loadFromString($this->settings['template']);
+        $tmpl = new Eresus_Template();
+        $tmpl->setSource($this->settings['template']);
         $html = $tmpl->compile(array('sections' => $sections));
 
-        $text = str_replace('$(Path)', $html, $text);
-
-        return $text;
+        $text = str_replace('$(Path)', $html, $event->getText());
+        $event->setText($text);
     }
 
     /**
      * Добавляет разделы в путь
      *
-     * @param array $item
-     * @param string $url
-     *
-     * @return void
+     * @param Eresus_Event_UrlSectionFound $event
      */
-    public function clientOnURLSplit(array $item, $url)
+    public function clientOnURLSplit(Eresus_Event_UrlSectionFound $event)
     {
+        $rootUrl = Eresus_Kernel::app()->getLegacyKernel()->root;
         $this->level++;
-        $item['url'] = $GLOBALS['Eresus']->root . ('main/' == $url ? '' : $url);
-        $item['parents'] = explode('/', $url);
+        $item = $event->getSectionInfo();
+        $item['url'] = $rootUrl . ('main/' == $event->getUrl() ? '' : $event->getUrl());
+        $item['parents'] = explode('/', $event->getUrl());
         array_pop($item['parents']);
         $this->path[] = $item;
     }
 }
 
-/**
- * Расширенный шаблон
- *
- * @package Path
- * @since 2.02
- */
-class Path_Tempalte extends Template
-{
-    /**
-     * Загружает код шаблона из строки
-     *
-     * @param string $code
-     *
-     * @return void
-     *
-     * @since 1.00
-     */
-    public function loadFromString($code)
-    {
-        $this->file = new Dwoo_Template_String($code);
-    }
-}
