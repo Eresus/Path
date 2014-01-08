@@ -37,189 +37,185 @@
  */
 class Path extends Plugin
 {
-	/**
-	 * Версия плагина
-	 *
-	 * @var string
-	 */
-	public $version = '${product.version}';
+    /**
+     * Версия плагина
+     *
+     * @var string
+     */
+    public $version = '${product.version}';
 
-	/**
-	 * Минимальная требуемая версия CMS
-	 *
-	 * @var string
-	 */
-	public $kernel = '3.00a';
+    /**
+     * Минимальная требуемая версия CMS
+     *
+     * @var string
+     */
+    public $kernel = '3.00a';
 
-	/**
-	 * Название
-	 *
-	 * @var string
-	 */
-	public $title = 'Положение на сайте';
+    /**
+     * Название
+     *
+     * @var string
+     */
+    public $title = 'Положение на сайте';
 
-	/**
-	 * Описание
-	 *
-	 * @var string
-	 */
-	public $description = 'Строка с текущим местом положения на сайте';
+    /**
+     * Описание
+     *
+     * @var string
+     */
+    public $description = 'Строка с текущим местом положения на сайте';
 
-	/**
-	 * Тип
-	 *
-	 * @var string
-	 */
-	public $type = 'client';
+    /**
+     * Тип
+     *
+     * @var string
+     */
+    public $type = 'client';
 
-	/**
-	 * Настройки
-	 *
-	 * @var string
-	 */
-	public $settings = array (
-		'template' => '{foreach $sections s, implode=" &raquo; "}
+    /**
+     * Настройки
+     *
+     * @var string
+     */
+    public $settings = array(
+        'template' => '{foreach $sections s, implode=" &raquo; "}
 	{if $s.isCurrent}
 		{$s.caption}
 	{else}
 		<a href="{$s.url}" title="{$s.description}">{$s.caption}</a>
 	{/if}
 {/foreach}',
-		'levelMin' => 0,
-		'levelMax' => 0,
-		'showHidden' => true,
-		'showCurrent' => true,
-	);
+        'levelMin' => 0,
+        'levelMax' => 0,
+        'showHidden' => true,
+        'showCurrent' => true,
+    );
 
-	/**
-	 * Хранит элементы пути
-	 *
-	 * @var array
-	 */
-	public $path = array();
+    /**
+     * Хранит элементы пути
+     *
+     * @var array
+     */
+    public $path = array();
 
-	/**
-	 * Уровень вложенности текущего раздела
-	 *
-	 * @var int
-	 */
-	public $level = -1;
+    /**
+     * Уровень вложенности текущего раздела
+     *
+     * @var int
+     */
+    public $level = -1;
 
-	/**
-	 * Конструктор
-	 *
-	 * @return Path
-	 */
-	public function __construct()
-	{
-		parent::__construct();
-		$this->listenEvents('clientOnURLSplit', 'clientOnPageRender');
-	}
-	//-----------------------------------------------------------------------------
+    /**
+     * Конструктор
+     *
+     * @return Path
+     */
+    public function __construct()
+    {
+        parent::__construct();
+        $this->listenEvents('clientOnURLSplit', 'clientOnPageRender');
+    }
 
-	/**
-	 * Возвращает разметку диалога настроек
-	 *
-	 * @return string  HTML
-	 *
-	 * @since 1.00
-	 */
-	public function settings()
-	{
-		global $page;
+    /**
+     * Возвращает разметку диалога настроек
+     *
+     * @return string  HTML
+     *
+     * @since 1.00
+     */
+    public function settings()
+    {
+        global $page;
 
-		$form = array(
-			'name' => 'Settings',
-			'caption' => $this->title.' '.$this->version,
-			'width' => '700px',
-			'fields' => array (
-				array('type'=>'hidden','name'=>'update', 'value'=>$this->name),
-				array('type'=>'edit','name'=>'levelMin','label'=>'Мин.вложенность','width'=>'20px',
-					'comment'=>' 0 - любая'),
-				array('type'=>'edit','name'=>'levelMax','label'=>'Макс.вложенность','width'=>'20px',
-					'comment'=>' 0 - любая'),
-				array('type'=>'checkbox','name'=>'showHidden','label'=>'Показывать скрытые разделы'),
-				array('type'=>'checkbox','name'=>'showCurrent',
-					'label'=>'Показывать текущий раздел даже если он скрытый'),
-				array('type' => 'memo','name' => 'template', 'syntax' => 'html', 'height' => 10,
-					'label'=>'Шаблон'),
-				array('type'=>'divider'),
-				array('type'=>'text',
-					'value'=>"Заменяет макрос $(Path) на строку с текущим положением на сайте."),
-				array('type'=>'divider'),
-			),
-			'buttons' => array('ok', 'apply', 'cancel'),
-		);
-		$result = $page->renderForm($form, $this->settings);
-		return $result;
-	}
-	//-----------------------------------------------------------------------------
+        $form = array(
+            'name' => 'Settings',
+            'caption' => $this->title . ' ' . $this->version,
+            'width' => '700px',
+            'fields' => array(
+                array('type' => 'hidden', 'name' => 'update', 'value' => $this->name),
+                array('type' => 'edit', 'name' => 'levelMin', 'label' => 'Мин.вложенность', 'width' => '20px',
+                    'comment' => ' 0 - любая'),
+                array('type' => 'edit', 'name' => 'levelMax', 'label' => 'Макс.вложенность', 'width' => '20px',
+                    'comment' => ' 0 - любая'),
+                array('type' => 'checkbox', 'name' => 'showHidden', 'label' => 'Показывать скрытые разделы'),
+                array('type' => 'checkbox', 'name' => 'showCurrent',
+                    'label' => 'Показывать текущий раздел даже если он скрытый'),
+                array('type' => 'memo', 'name' => 'template', 'syntax' => 'html', 'height' => 10,
+                    'label' => 'Шаблон'),
+                array('type' => 'divider'),
+                array('type' => 'text',
+                    'value' => "Заменяет макрос $(Path) на строку с текущим положением на сайте."),
+                array('type' => 'divider'),
+            ),
+            'buttons' => array('ok', 'apply', 'cancel'),
+        );
+        $result = $page->renderForm($form, $this->settings);
+        return $result;
+    }
 
-	/**
-	 * Проводит замену макроса
-	 *
-	 * @param string $text
-	 *
-	 * @return string
-	 */
-	function clientOnPageRender($text)
-	{
-		global $Eresus;
+    /**
+     * Проводит замену макроса
+     *
+     * @param string $text
+     *
+     * @return string
+     */
+    function clientOnPageRender($text)
+    {
+        global $Eresus;
 
-		if (
-			($this->settings['levelMin'] && ($this->level < $this->settings['levelMin']))
-			||
-			($this->settings['levelMax'] && ($this->level > $this->settings['levelMax']))
-		)
-		{
-			return $text;
-		}
+        if (
+            ($this->settings['levelMin'] && ($this->level < $this->settings['levelMin']))
+            ||
+            ($this->settings['levelMax'] && ($this->level > $this->settings['levelMax']))
+        )
+        {
+            return $text;
+        }
 
-		/*
-		 * Нельзя выполнять эти действия в clientOnURLSplit, потому что в том методе ещё неизвестен
-		 * текущий раздел.
-		 */
-		$sections = array();
-		foreach ($this->path as $section)
-		{
-			$section['isCurrent'] = $section['id'] == $GLOBALS['page']->id;
-			if (
-				($section['visible'] || $this->settings['showHidden'])
-				||
-				($section['isCurrent'] && $this->settings['showCurrent'])
-			)
-			{
-				$sections []= $section;
-			}
-		}
+        /*
+         * Нельзя выполнять эти действия в clientOnURLSplit, потому что в том методе ещё неизвестен
+         * текущий раздел.
+         */
+        $sections = array();
+        foreach ($this->path as $section)
+        {
+            $section['isCurrent'] = $section['id'] == $GLOBALS['page']->id;
+            if (
+                ($section['visible'] || $this->settings['showHidden'])
+                ||
+                ($section['isCurrent'] && $this->settings['showCurrent'])
+            )
+            {
+                $sections [] = $section;
+            }
+        }
 
-		$tmpl = new Path_Tempalte();
-		$tmpl->loadFromString($this->settings['template']);
-		$html = $tmpl->compile(array('sections' => $sections));
+        $tmpl = new Path_Tempalte();
+        $tmpl->loadFromString($this->settings['template']);
+        $html = $tmpl->compile(array('sections' => $sections));
 
-		$text = str_replace('$(Path)', $html, $text);
+        $text = str_replace('$(Path)', $html, $text);
 
-		return $text;
-	}
-	//-----------------------------------------------------------------------------
+        return $text;
+    }
 
-	/**
-	 * Добавляет разделы в путь
-	 *
-	 * @param array $item
-	 * @param string $url
-	 *
-	 * @return void
-	 */
-	public function clientOnURLSplit(array $item, $url)
-	{
-		$this->level++;
-		$item['url'] = $GLOBALS['Eresus']->root . ('main/' == $url ? '' : $url);
-		$item['parents'] = explode('/', $url);
-		array_pop($item['parents']);
-		$this->path[] = $item;
-	}
-	//-----------------------------------------------------------------------------
+    /**
+     * Добавляет разделы в путь
+     *
+     * @param array $item
+     * @param string $url
+     *
+     * @return void
+     */
+    public function clientOnURLSplit(array $item, $url)
+    {
+        $this->level++;
+        $item['url'] = $GLOBALS['Eresus']->root . ('main/' == $url ? '' : $url);
+        $item['parents'] = explode('/', $url);
+        array_pop($item['parents']);
+        $this->path[] = $item;
+    }
 }
 
 /**
@@ -230,18 +226,17 @@ class Path extends Plugin
  */
 class Path_Tempalte extends Template
 {
-	/**
-	 * Загружает код шаблона из строки
-	 *
-	 * @param string $code
-	 *
-	 * @return void
-	 *
-	 * @since 1.00
-	 */
-	public function loadFromString($code)
-	{
-		$this->file = new Dwoo_Template_String($code);
-	}
-	//-----------------------------------------------------------------------------
+    /**
+     * Загружает код шаблона из строки
+     *
+     * @param string $code
+     *
+     * @return void
+     *
+     * @since 1.00
+     */
+    public function loadFromString($code)
+    {
+        $this->file = new Dwoo_Template_String($code);
+    }
 }
