@@ -4,12 +4,11 @@
  *
  * Строка с местом положения на сайте.
  *
- * @version 3.00
+ * @version ${product.version}
  *
- * @copyright 2005, ProCreat Systems, http://procreat.ru/
- * @copyright 2007, Eresus Group, http://eresus.ru/
+ * @copyright 2005, Михаил Красильников <m.krasilnikov@yandex.ru>
  * @license http://www.gnu.org/licenses/gpl.txt  GPL License 3
- * @author Михаил Красильников <mihalych@vsepofigu.ru>
+ * @author Михаил Красильников <m.krasilnikov@yandex.ru>
  * @author Olex
  *
  * Данная программа является свободным программным обеспечением. Вы
@@ -29,8 +28,6 @@
  * <http://www.gnu.org/licenses/>
  *
  * @package Path
- *
- * $Id$
  */
 
 /**
@@ -45,7 +42,7 @@ class Path extends Plugin
 	 *
 	 * @var string
 	 */
-	public $version = '3.00a';
+	public $version = '${product.version}';
 
 	/**
 	 * Минимальная требуемая версия CMS
